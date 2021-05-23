@@ -4,16 +4,13 @@ require 'yaml'
 require 'json'
 
 class DevTool
+  VERSION = '0.1.0'
   MAIN_HELP_BANNER = <<HEREDOC
 Execute various commands within the developer environment
 
 Usage:
   cig [options] [COMMAND] [ARGS...]"
   cig -h|--help
-
-Options:
-  --verbose                 Show more output
-  -v, --version             Print version and exit
 
 Commands:
   build              Build or rebuild services
@@ -35,12 +32,13 @@ Commands:
   stop               Stop services
   up                 Create and start containers
   update             Update cig-sdk environment
+  version            Show cig-sdk version
 
 HEREDOC
 
   PROXY_UNMODIFIED_TO_COMPOSE=%w{build kill logs ps pull restart rm start pause unpause}
   PROXY_MODIFIED=%w{up run help stop}
-  OTHER_COMMANDS=%w{wait reload cleanup machine update service status shell exec create}
+  OTHER_COMMANDS=%w{wait reload cleanup machine update service status shell exec create version}
 
   CREATE_HELP='Usage: $ cig create --type=wordpress --components=dustpress --stage=stage.mydomain.com --production=cloud.mydomain.com --theme=ssh://git@domain:/theme.git --sitename=myapp --stage=stage.mydomain.com --production=production.mydomain.com --git=ssh://git@mydomain:/my-app.git'
   
@@ -56,6 +54,10 @@ HEREDOC
     else
       puts MAIN_HELP_BANNER
     end
+  end
+
+  def version(args)
+    puts VERSION
   end
 
   # Show docker-compose command helpers for original commands
