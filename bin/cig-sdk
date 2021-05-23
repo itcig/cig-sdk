@@ -8,8 +8,8 @@ class DevTool
 Execute various commands within the developer environment
 
 Usage:
-  dev [options] [COMMAND] [ARGS...]"
-  dev -h|--help
+  cig [options] [COMMAND] [ARGS...]"
+  cig -h|--help
 
 Options:
   --verbose                 Show more output
@@ -30,11 +30,11 @@ Commands:
   rm                 Remove stopped containers
   run                Run a one-off command
   shell              Open shell inside container
-  service            Manage gdev services (nginx and dnsmasq, mail)
+  service            Manage cig-sdk services (nginx and dnsmasq, mail)
   start              Start services
   stop               Stop services
   up                 Create and start containers
-  update             Update gdev environment
+  update             Update cig-sdk environment
 
 HEREDOC
 
@@ -42,7 +42,7 @@ HEREDOC
   PROXY_MODIFIED=%w{up run help stop}
   OTHER_COMMANDS=%w{wait reload cleanup machine update service status shell exec create}
 
-  CREATE_HELP='Usage: $ gdev create --type=wordpress --components=dustpress --stage=stage.mydomain.com --production=cloud.mydomain.com --theme=ssh://git@domain:/theme.git --sitename=myapp --stage=stage.mydomain.com --production=production.mydomain.com --git=ssh://git@mydomain:/my-app.git'
+  CREATE_HELP='Usage: $ cig create --type=wordpress --components=dustpress --stage=stage.mydomain.com --production=cloud.mydomain.com --theme=ssh://git@domain:/theme.git --sitename=myapp --stage=stage.mydomain.com --production=production.mydomain.com --git=ssh://git@mydomain:/my-app.git'
 
   def initialize(args)
     if PROXY_UNMODIFIED_TO_COMPOSE.include?(args[0])
@@ -63,7 +63,7 @@ HEREDOC
         args.unshift("docker-compose")
         system(args.join(" "))
       elsif OTHER_COMMANDS.include?(args[1])
-        puts("This is a gdev custom command and not part of docker-compose. See wiki for explanation.")
+        puts("This is a cig-sdk custom command and not part of docker-compose. See wiki for explanation.")
       end
     else
       puts MAIN_HELP_BANNER
@@ -167,25 +167,25 @@ HEREDOC
     if (args[0] == "dns")
 
       if RUBY_PLATFORM.include? "linux"
-        system('ansible-playbook /usr/local/gdev-env/ansible/ubuntu.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns')
+        system('ansible-playbook /usr/local/cig-sdk/ansible/ubuntu.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns')
       else
-        system('ansible-playbook /usr/local/gdev-env/ansible/mac.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns')
+        system('ansible-playbook /usr/local/cig-sdk/ansible/mac.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns')
       end
 
     elsif (args[0].nil?)
 
       if RUBY_PLATFORM.include? "linux"
-        system('cd /usr/local/gdev-env && git reset HEAD --hard && git pull origin HEAD && bin/ubuntu')
+        system('cd /usr/local/cig-sdk && git reset HEAD --hard && git pull origin HEAD && bin/ubuntu')
       else
-        system('cd /usr/local/gdev-env && git reset HEAD --hard && git pull origin HEAD && bin/bootstrap')
+        system('cd /usr/local/cig-sdk && git reset HEAD --hard && git pull origin HEAD && bin/bootstrap')
       end
       # Rebuild and reload all services
-      puts "Refreshing all gdev services..."
+      puts "Refreshing all cig-sdk services..."
       service(['build nginx'])
       service(['reload'])
 
     else
-      puts "Did you mean to run: $ gdev update ?"
+      puts "Did you mean to run: $ cig update ?"
     end
   end
 
@@ -199,7 +199,7 @@ HEREDOC
     elsif (args[0].nil?)
       no_command_given = true
     end
-    args.unshift("docker-compose", "-f /usr/local/gdev-env/docker/services.yml", "-p gdev")
+    args.unshift("docker-compose", "-f /usr/local/cig-sdk/docker/services.yml", "-p cig")
     
     #If linux, set ip, otherwise assume user is on mac os x
     if RUBY_PLATFORM.include? "linux"
@@ -216,7 +216,7 @@ HEREDOC
     end
   end
 
-  # Syntactic sugar for: $ gdev ps
+  # Syntactic sugar for: $ cig ps
   # I want this to look like vagrant binary
   def status(args)
     system("docker-compose ps")
@@ -322,10 +322,10 @@ HEREDOC
           `rm -rf #{args['sitename']}/web/app/themes/#{themename}/.git`
           puts ""
         else
-          # TODO: get default theme url from ~/.gdev/gdevconf.yml
+          # TODO: get default theme url from ~/.cig-sdk/config.yml
           # do not get theme if default is not set
           puts "TODO"
-          puts "Cloning default theme if set ~/.gdev/gdevconf.yml"
+          puts "Cloning default theme if set ~/.cig-sdk/config.yml"
         end
         # check which components to install if any
         if args['components']
@@ -428,9 +428,9 @@ HEREDOC
         end
         puts ""
 
-        # gdev up
-        puts "Running gdev up..."
-        puts `cd #{args["sitename"]}; gdev up`
+        # cig up
+        puts "Running cig up..."
+        puts `cd #{args["sitename"]}; cig up`
         puts ""
 
         # running seed
@@ -439,7 +439,7 @@ HEREDOC
           sleep(10)
           puts ""
           puts "Running seed (Installing WordPress)..."
-          puts `cd #{args["sitename"]}; gdev exec scripts/seed.sh`
+          puts `cd #{args["sitename"]}; cig exec scripts/seed.sh`
           puts ""
         end
 
@@ -498,8 +498,8 @@ HEREDOC
 
   def get_defaults(type)
     defaults = Hash.new
-    if File.exist?(ENV['HOME']+'/.gdev/gdevconf.yml')
-      config = YAML.load(File.read(ENV['HOME']+"/.gdev/gdevconf.yml"))
+    if File.exist?(ENV['HOME']+'/.cig-sdk/config.yml')
+      config = YAML.load(File.read(ENV['HOME']+"/.cig-sdk/config.yml"))
       defaults = config['create']['defaults'][type]
     end
     return defaults

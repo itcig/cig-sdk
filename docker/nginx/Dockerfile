@@ -1,5 +1,4 @@
 FROM jwilder/nginx-proxy
-MAINTAINER Onni Hakala - Geniem Oy
 
 # Add bigger timeouts and filesizes for nginx-proxy
 # Move lot of config from nginx.tmpl to own files in conf.d

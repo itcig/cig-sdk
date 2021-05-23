@@ -3,18 +3,17 @@
   connection: local
 
   vars:
-    gdev_env_dir: "/usr/local/gdev-env"
-    gdev_user_files: "{{ansible_env.HOME}}/.gdev"
-    machine_ip: 172.17.0.1
+    cig_sdk_dir: "/usr/local/cig-sdk"
+    cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
+    machine_ip: host.docker.internal
     compose_version: 1.15.0
 
   tasks:
-
     - name: Install ruby
       become: yes
       become_method: sudo
-      apt: 
-        name: ruby 
+      apt:
+        name: ruby
         state: latest
 
     - name: "Add Docker key"
@@ -34,7 +33,7 @@
     - name: Install Docker
       become: yes
       become_method: sudo
-      apt: 
+      apt:
         name: docker-ce
         state: latest
         update_cache: yes
@@ -44,9 +43,9 @@
       become_method: sudo
       shell: "curl -L https://github.com/docker/compose/releases/download/{{ compose_version }}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose"
 
-    - name: Create gdev directory
+    - name: Create cig-sdk directory
       file:
-        path: "{{ansible_env.HOME}}/.gdev"
+        path: "{{ansible_env.HOME}}/.cig-sdk"
         state: directory
         owner: "{{ansible_env.USER}}"
         group: "staff"
@@ -56,18 +55,18 @@
       become: yes
       become_method: sudo
 
-    - name: Symlink gdev bin to PATH
+    - name: Symlink cig-sdk bin to PATH
       become: yes
       become_method: sudo
       file:
-        src: "{{gdev_env_dir}}/bin/gdev"
-        dest: /usr/local/bin/gdev
+        src: "{{cig_sdk_dir}}/bin/cig-sdk"
+        dest: /usr/local/bin/cig-sdk
         state: link
         force: yes
-      tags: ['pre-install']
-      
+      tags: ["pre-install"]
+
     - name: Add user to docker group
-      user: 
+      user:
         name: "{{ansible_env.USER}}"
         groups: docker
         append: yes
@@ -81,12 +80,12 @@
         name: docker
         state: started
 
-    - name: Start gdev services
-      shell: "sg docker -c '{{ gdev_env_dir }}/bin/gdev service up'"
+    - name: Start cig-sdk services
+      shell: "sg docker -c '{{ cig_sdk_dir }}/bin/cig-sdk service up'"
 
     - name: Wait for signaler to create CA file
       wait_for:
-        path: "{{ gdev_user_files }}/ca/ca.crt"
+        path: "{{ cig_sdk_user_files }}/ca/ca.crt"
         state: present
         timeout: 30
 
@@ -94,7 +93,7 @@
     - name: Trust self-generated signaler Root certificate in keychain
       shell: "cp ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates"
       args:
-        chdir: "{{ gdev_user_files }}/ca/"
+        chdir: "{{ cig_sdk_user_files }}/ca/"
       become: yes
       become_method: sudo
 

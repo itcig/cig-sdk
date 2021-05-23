@@ -1,9 +1,9 @@
-version: '3'
+version: "3"
 
 services:
   ##
   # NOTICE:
-  # env BOX_IP is defined only for gdev services
+  # env BOX_IP is defined only for cig-sdk services
   # This is the ip address of the VM which runs docker containers
   ##
 
@@ -16,7 +16,7 @@ services:
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       # Mount self signed https certificates for testing environment
-      - ${HOME}/.gdev/certs:/etc/nginx/certs:ro
+      - ${HOME}/.cig-sdk/certs:/etc/nginx/certs:ro
     network_mode: "bridge"
     #restart: always
   dnsmasq:
@@ -46,9 +46,9 @@ services:
     environment:
       GENERATOR: "self-signed"
     volumes:
-      # Mount .gdev folders to store certificates in
-      - ${HOME}/.gdev/certs:/data/certs
-      - ${HOME}/.gdev/ca:/data/ca
+      # Mount .cig-sdk folders to store certificates in
+      - ${HOME}/.cig-sdk/certs:/data/certs
+      - ${HOME}/.cig-sdk/ca:/data/ca
 
       # Mount docker socket so that signaler can auto create certificates
       - /var/run/docker.sock:/tmp/docker.sock:ro

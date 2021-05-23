@@ -7,15 +7,16 @@ sudo apt-get update
 sudo apt install git curl ansible -y
 
 # This is fork from original
-REPO='devgeniem/gdev'
+REPO='itcig/cig-sdk'
 
 # Returns 1 if not enough disk space
 # $1 disk space needed in gb
 free_disk_space() {
   local needed_mb=$1
-  local available_mb=$(df -m / | tail -n 1 | xargs echo | cut -d' ' -f4)
+  local available_mb
+  available_mb=$(df -m / | tail -n 1 | xargs echo | cut -d' ' -f4)
 
-  echo "Available disk space: "$available_mb"mb"
+  echo "Available disk space: ${available_mb}mb"
 
   if [ "$needed_mb" -ge "$available_mb" ]; then
     return 1
@@ -33,23 +34,23 @@ else
 fi
 
 # Check out a copy of this repo (first time only) ##
-GDEV_DIR=/usr/local/gdev-env/
-if [ -d "$GDEV_DIR" ]; then
-  echo "Updating pre-existing gdev repo..."
-  cd $GDEV_DIR
+CIG_SDK_DIR=/usr/local/cig-sdk/
+if [ -d "$CIG_SDK_DIR" ]; then
+  echo "Updating pre-existing cig-sdk repo..."
+  cd $CIG_SDK_DIR || exit
   # Remove any local changes and update to origin
   git reset HEAD --hard && git pull origin HEAD
 else
-  echo "Checking out gdev repo..."
-  sudo git clone https://github.com/$REPO.git $GDEV_DIR 2>/dev/null
-  sudo chmod -R og+rw $GDEV_DIR
+  echo "Checking out cig-sdk repo..."
+  sudo git clone https://github.com/$REPO.git $CIG_SDK_DIR 2>/dev/null
+  sudo chmod -R og+rw $CIG_SDK_DIR
 fi
 
 echo 'Handing Playbook to Ansible (will require your sudo password)...'
 echo -e "\n"
-# Continue with gdev setup
-ansible-playbook $GDEV_DIR/ansible/ubuntu/ubuntu.yml -i 127.0.0.1, --ask-become-pass -vvvv
+# Continue with cig-sdk setup
+ansible-playbook $CIG_SDK_DIR/ansible/ubuntu/ubuntu.yml -i 127.0.0.1, --ask-become-pass -vvvv
 
 # Help user to debug usual problems
-echo "If this was your first time installing Gdev, please restart your system now to make sure all software gets installed correctly ."
+echo "If this was your first time installing cig-sdk, please restart your system now to make sure all software gets installed correctly ."
 echo "If you had any errors you can try reboot your machine and then running this again."
