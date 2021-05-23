@@ -388,7 +388,7 @@ HEREDOC
           new_contents = text.gsub(/themename-textdomain/, "#{args['sitename'].downcase}-td")
           File.open(file_name, "w") {|file| file.puts new_contents }
         end
-        puts "Replacing 'wordpress.test' strings from all project files with '#{args['sitename'].downcase}.test'..."
+        puts "Replacing 'wordpress.local' strings from all project files with '#{args['sitename'].downcase}.local'..."
         wordpresstest_file_names = [
           "#{args['sitename']}/.drone.yml",
           "#{args['sitename']}/docker-compose.yml",
@@ -396,13 +396,13 @@ HEREDOC
         ]
         wordpresstest_file_names.each do |file_name|
           text = File.read(file_name)
-          new_contents = text.gsub(/wordpress.test/, "#{args['sitename'].downcase}.test")
+          new_contents = text.gsub(/wordpress.local/, "#{args['sitename'].downcase}.local")
           File.open(file_name, "w") {|file| file.puts new_contents }
         end
 
-        # change project test address in docker-compose.yml for example wordpress.test -> client-name.test
+        # change project test address in docker-compose.yml for example wordpress.local -> client-name.local
         #docker_compose = File.read("#{args['sitename']}/docker-compose.yml")
-        #docker_compose_replace = docker_compose.gsub(/wordpress.test/, "#{args['sitename']}.test")
+        #docker_compose_replace = docker_compose.gsub(/wordpress.local/, "#{args['sitename']}.local")
         #File.open("#{args['sitename']}/docker-compose.yml", "w") {|file| file.puts docker_compose_replace }
 
         # TODO: Add all people working in the project into authors section of composer.json and rename the project devgeniem/wp-project->devgeniem/client in composer.json
@@ -445,7 +445,7 @@ HEREDOC
           puts ""
         end
 
-        puts "Point your browser to https://#{args['sitename'].downcase}.test/wp-admin and log in"
+        puts "Point your browser to https://#{args['sitename'].downcase}.local/wp-admin and log in"
 
         # TODO: help for setting up stage and production
         puts ""
