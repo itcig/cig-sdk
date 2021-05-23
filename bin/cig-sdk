@@ -43,6 +43,8 @@ HEREDOC
   OTHER_COMMANDS=%w{wait reload cleanup machine update service status shell exec create}
 
   CREATE_HELP='Usage: $ cig create --type=wordpress --components=dustpress --stage=stage.mydomain.com --production=cloud.mydomain.com --theme=ssh://git@domain:/theme.git --sitename=myapp --stage=stage.mydomain.com --production=production.mydomain.com --git=ssh://git@mydomain:/my-app.git'
+  
+  CIG_SDK_DIR='/usr/local/cig-sdk'
 
   def initialize(args)
     if PROXY_UNMODIFIED_TO_COMPOSE.include?(args[0])
@@ -167,17 +169,17 @@ HEREDOC
     if (args[0] == "dns")
 
       if RUBY_PLATFORM.include? "linux"
-        system('ansible-playbook /usr/local/cig-sdk/ansible/ubuntu.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns')
+        system("ansible-playbook #{CIG_SDK_DIR}/ansible/ubuntu.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns")
       else
-        system('ansible-playbook /usr/local/cig-sdk/ansible/mac.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns')
+        system("ansible-playbook #{CIG_SDK_DIR}/ansible/mac.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns")
       end
 
     elsif (args[0].nil?)
 
       if RUBY_PLATFORM.include? "linux"
-        system('cd /usr/local/cig-sdk && git reset HEAD --hard && git pull origin HEAD && bin/ubuntu')
+        system("cd #{CIG_SDK_DIR} && git reset HEAD --hard && git pull origin HEAD && bin/ubuntu")
       else
-        system('cd /usr/local/cig-sdk && git reset HEAD --hard && git pull origin HEAD && bin/bootstrap')
+        system("cd #{CIG_SDK_DIR} && git reset HEAD --hard && git pull origin HEAD && bin/bootstrap")
       end
       # Rebuild and reload all services
       puts "Refreshing all cig-sdk services..."
@@ -199,7 +201,7 @@ HEREDOC
     elsif (args[0].nil?)
       no_command_given = true
     end
-    args.unshift("docker-compose", "-f /usr/local/cig-sdk/docker/services.yml", "-p cig")
+    args.unshift("docker-compose", "-f #{CIG_SDK_DIR}/docker/services.yml", "-p cig")
     
     #If linux, set ip, otherwise assume user is on mac os x
     if RUBY_PLATFORM.include? "linux"
