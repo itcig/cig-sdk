@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+# We need at least ansible 2.0 for blockinfile directive
+ANSIBLE_NEEDED="2.0"
+
+# Only OS X yosemite and later support xhyve
+OSX_NEEDED="10.10.0"
+
+# This is fork from original
+REPO='itcig/cig-sdk'
+
+# Returns 1 if upgrade is needed
+# $1 - SYSTEM VERSION
+# $2 - NEEDED VERSION
+update_needed() {
+  highest_version=$(printf "%s\n%s" "$1" "$2" | sort -t '.' -k 1,1 -k 2,2 -k 3,3 -g | sed -n 2p)
+  if [ "$highest_version" != "$2" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# Returns 1 if not enough disk space
+# $1 disk space needed in gb
+free_disk_space() {
+  local needed_gb=$1
+  local available_gb
+  available_gb=$(df -g / | tail -n 1 | xargs echo | cut -d' ' -f4)
+
+  echo "Available disk space: ${available_gb}gb"
+
+  if [ "$needed_gb" -ge "$available_gb" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+# Check that OS X is current enough
+which -s sw_vers
+if [[ $? != 0 ]]; then
+  echo "ERROR: This is only supported with OS X. What system are you using?"
+  exit 1
+else
+  echo "CHECK: Minimum OS-X version needed: $OSX_NEEDED"
+  OSX_VERSION=$(sw_vers -productVersion)
+
+  if update_needed "$OSX_VERSION" "$OSX_NEEDED"; then
+    echo "ERROR: You need to update your OS X, it is only $OSX_VERSION"
+    exit 1
+  else
+    echo "OK: OS X version is sufficient ($OSX_VERSION)..."
+  fi
+fi
+
+# Check if computer supports hypervisor framework
+echo "CHECK: hypervisor framework needs to be enabled in your computer"
+sysctl kern.hv_support
+if [[ $? != 0 ]]; then
+  echo "ERROR: Your computer is too old to support xhyve"
+  exit 1
+fi
+
+## Check available disk space in gigabytes
+if free_disk_space 10; then
+  echo "CHECK: You have at least 10gb available space."
+else
+  echo "ERROR: You need to have 10gb available space."
+fi
+
+# Check out a copy of this repo (first time only) ##
+CIG_SDK_DIR=/usr/local/cig-sdk
+if [ -d "$CIG_SDK_DIR" ]; then
+  echo "Updating pre-existing cig-sdk repo..."
+  cd $CIG_SDK_DIR || exit
+  # Remove any local changes and update to origin
+  git reset HEAD --hard && git pull origin HEAD
+else
+  # On OSX Sierra /usr/local is not owned by admin user and we can't just clone over there
+  echo "Checking out cig-sdk repo... ( This needs sudo permissions )"
+  sudo git clone https://github.com/$REPO.git $CIG_SDK_DIR
+
+  # Check that cig-sdk folder has right permissions
+  sudo chown -R "$USER":"$(id -gn)" $CIG_SDK_DIR
+fi
+
+echo 'Handing Playbook to Ansible (will require your sudo password)...'
+echo -e "\n"
+
+# Continue with cig-sdk setup
+cd /usr/local/cig-sdk/ansible/ || exit
+ansible-playbook mac.yml -i 127.0.0.1, --ask-become-pass -vvvv
+
+# Help user to debug usual problems
+echo "If you had any errors you can try reboot your machine and then running this again."
