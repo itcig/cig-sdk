@@ -57,7 +57,7 @@ HEREDOC
   end
 
   def version(args)
-    puts VERSION
+    puts "CIG SDK #{VERSION}"
   end
 
   # Show docker-compose command helpers for original commands
