@@ -71,25 +71,12 @@ fi
 
 # Check out a copy of this repo (first time only) ##
 CIG_SDK_DIR=/usr/local/cig-sdk
-if [ -d "$CIG_SDK_DIR" ]; then
-  echo "Updating pre-existing cig-sdk repo..."
-  cd $CIG_SDK_DIR || exit
-  # Remove any local changes and update to origin
-  git reset HEAD --hard && git pull origin HEAD
-else
-  # On OSX Sierra /usr/local is not owned by admin user and we can't just clone over there
-  echo "Checking out cig-sdk repo... ( This needs sudo permissions )"
-  sudo git clone https://github.com/$REPO.git $CIG_SDK_DIR
-
-  # Check that cig-sdk folder has right permissions
-  sudo chown -R "$USER":"$(id -gn)" $CIG_SDK_DIR
-fi
 
 echo 'Handing Playbook to Ansible (will require your sudo password)...'
 echo -e "\n"
 
 # Continue with cig-sdk setup
-cd /usr/local/cig-sdk/ansible/ || exit
+cd "$CIG_SDK_DIR/ansible/" || exit
 ansible-playbook mac.yml -i 127.0.0.1, --ask-become-pass -vvvv
 
 # Help user to debug usual problems
