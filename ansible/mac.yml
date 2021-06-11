@@ -56,16 +56,21 @@
     #     mode: 0755
     #   # If this was somehow root owned make sure it's not anymore
     #   become: yes
-    - name: Create cig-sdk directory
+    - name: Create cig-sdk directories
       file:
-        path: "{{ansible_env.HOME}}/.cig-sdk"
+        path: "{{ item }}"
         state: directory
         owner: "{{ansible_env.USER}}"
         group: "staff"
         recurse: yes
         mode: 0755
+      loop:
+        - "{{ansible_env.HOME}}/.cig-sdk"
+        - "{{ansible_env.HOME}}/.cig-sdk/ca"
+        - "{{ansible_env.HOME}}/.cig-sdk/certs"
       # If this was somehow root owned make sure it's not anymore
       become: yes
+
     # - name: Symlink cig-sdk bin to PATH
     #   file:
     #     src: "{{cig_sdk_dir}}/bin/cig-sdk"
