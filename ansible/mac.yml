@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    cig_sdk_dir: /usr/local/cig-sdk
+    # cig_sdk_dir: /usr/local/cig-sdk
     cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
 
     # This is alias for localhost loopback so that containers can connect to software running in osx ports
@@ -46,16 +46,16 @@
       become: yes
       when: not pip_installed.stat.exists
     # Directory permissions
-    - name: Check cig-sdk directory permissions
-      file:
-        path: "{{cig_sdk_dir}}"
-        state: directory
-        owner: "{{ansible_env.USER}}"
-        group: "staff"
-        recurse: yes
-        mode: 0755
-      # If this was somehow root owned make sure it's not anymore
-      become: yes
+    # - name: Check cig-sdk directory permissions
+    #   file:
+    #     path: "{{cig_sdk_dir}}"
+    #     state: directory
+    #     owner: "{{ansible_env.USER}}"
+    #     group: "staff"
+    #     recurse: yes
+    #     mode: 0755
+    #   # If this was somehow root owned make sure it's not anymore
+    #   become: yes
     - name: Create cig-sdk directory
       file:
         path: "{{ansible_env.HOME}}/.cig-sdk"
@@ -66,14 +66,14 @@
         mode: 0755
       # If this was somehow root owned make sure it's not anymore
       become: yes
-    - name: Symlink cig-sdk bin to PATH
-      file:
-        src: "{{cig_sdk_dir}}/bin/cig-sdk"
-        dest: /usr/local/bin/cig-sdk
-        state: link
-      tags: ["pre-install"]
+    # - name: Symlink cig-sdk bin to PATH
+    #   file:
+    #     src: "{{cig_sdk_dir}}/bin/cig-sdk"
+    #     dest: /usr/local/bin/cig-sdk
+    #     state: link
+    #   tags: ["pre-install"]
     - name: Check that host ip looback is running
-      command: "ifconfig lo0 alias 10.254.254.254"
+      command: "ifconfig lo0 alias host.docker.internal"
       become: yes
     # No longer needed with built-in Docker host.docker.internal loopback
     # - name: Ensure host ip looback after reboots
@@ -110,7 +110,8 @@
         msg: "Check that Docker for Mac is enabled! /var/run/docker.sock is not mounted. :("
       when: not docker_socket.stat.exists
     - name: Start or reload cig-sdk services
-      command: "{{ cig_sdk_dir }}/bin/cig-sdk service up --build --force-recreate"
+      command: "cig service up --build --force-recreate"
+      # command: "{{ cig_sdk_dir }}/bin/cig-sdk service up --build --force-recreate"
     - name: Wait for signaler to create CA file
       wait_for:
         path: "{{ cig_sdk_user_files }}/ca/ca.crt"
