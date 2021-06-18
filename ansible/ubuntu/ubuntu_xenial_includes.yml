@@ -11,7 +11,7 @@
     dest: "/etc/NetworkManager/dnsmasq.d/{{item.domain}}.conf"
     force: yes
   with_items:
-    - { ip: "{{ machine_ip }}", domain: local }
+    - { ip: "{{ machine_ip }}", domain: test }
 
 - name: Restart systemd-resolved
   become: yes

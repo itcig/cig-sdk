@@ -4,7 +4,7 @@ require 'yaml'
 require 'json'
 
 class DevTool
-  VERSION = '0.1.2'
+  VERSION = '0.1.4'
   MAIN_HELP_BANNER = <<HEREDOC
 Execute various commands within the developer environment
 
@@ -75,10 +75,10 @@ HEREDOC
   end
 
   def stop(args)
-    if RUBY_PLATFORM.include? "darwin"
-      # Stop Docker-Sync
-      system("docker-sync stop")
-    end
+    # if RUBY_PLATFORM.include? "darwin"
+    #   # Stop Docker-Sync
+    #   system("docker-sync stop")
+    # end
 
     args.unshift("docker-compose")
     system(args.join(" "))
@@ -137,10 +137,10 @@ HEREDOC
 
   def up(args)
     service(["up"])
-    if RUBY_PLATFORM.include? "darwin"
-      # Start Docker-Sync
-      system("docker-sync start")
-    end
+    # if RUBY_PLATFORM.include? "darwin"
+    #   # Start Docker-Sync
+    #   system("docker-sync start")
+    # end
 
     args.insert(1, "-d")
     args.unshift("docker-compose")
@@ -205,12 +205,13 @@ HEREDOC
     end
     args.unshift("docker-compose", "-f #{CIG_SDK_DIR}/docker/services.yml", "-p cig")
     
-    #If linux, set ip, otherwise assume user is on mac os x
+    # If linux, set ip, otherwise assume user is on mac os x
     if RUBY_PLATFORM.include? "linux"
       box_ip="172.17.0.1"
     else
       box_ip="10.254.254.254"
     end
+
     # Set system variables which we can use in our templates
     system({"BOX_IP" => box_ip},args.join(" "))
 
@@ -371,9 +372,9 @@ HEREDOC
           "#{args['sitename']}/docker-compose.yml"
         ]
         # Add one additional replace to the array.
-        if RUBY_PLATFORM.include? "darwin"
-          projectname_file_names.insert(-1, "#{args['sitename']}/docker-sync.yml")
-        end
+        # if RUBY_PLATFORM.include? "darwin"
+        #   projectname_file_names.insert(-1, "#{args['sitename']}/docker-sync.yml")
+        # end
         projectname_file_names.each do |file_name|
           text = File.read(file_name)
           new_contents = text.gsub(/PROJECTNAME/, "#{args['sitename']}")
@@ -390,7 +391,7 @@ HEREDOC
           new_contents = text.gsub(/themename-textdomain/, "#{args['sitename'].downcase}-td")
           File.open(file_name, "w") {|file| file.puts new_contents }
         end
-        puts "Replacing 'wordpress.local' strings from all project files with '#{args['sitename'].downcase}.local'..."
+        puts "Replacing 'wordpress.test' strings from all project files with '#{args['sitename'].downcase}.test'..."
         wordpresstest_file_names = [
           "#{args['sitename']}/.drone.yml",
           "#{args['sitename']}/docker-compose.yml",
@@ -398,13 +399,13 @@ HEREDOC
         ]
         wordpresstest_file_names.each do |file_name|
           text = File.read(file_name)
-          new_contents = text.gsub(/wordpress.local/, "#{args['sitename'].downcase}.local")
+          new_contents = text.gsub(/wordpress.test/, "#{args['sitename'].downcase}.test")
           File.open(file_name, "w") {|file| file.puts new_contents }
         end
 
-        # change project test address in docker-compose.yml for example wordpress.local -> client-name.local
+        # change project test address in docker-compose.yml for example wordpress.test -> client-name.test
         #docker_compose = File.read("#{args['sitename']}/docker-compose.yml")
-        #docker_compose_replace = docker_compose.gsub(/wordpress.local/, "#{args['sitename']}.local")
+        #docker_compose_replace = docker_compose.gsub(/wordpress.test/, "#{args['sitename']}.test")
         #File.open("#{args['sitename']}/docker-compose.yml", "w") {|file| file.puts docker_compose_replace }
 
         # TODO: Add all people working in the project into authors section of composer.json and rename the project devgeniem/wp-project->devgeniem/client in composer.json
@@ -447,7 +448,7 @@ HEREDOC
           puts ""
         end
 
-        puts "Point your browser to https://#{args['sitename'].downcase}.local/wp-admin and log in"
+        puts "Point your browser to https://#{args['sitename'].downcase}.test/wp-admin and log in"
 
         # TODO: help for setting up stage and production
         puts ""

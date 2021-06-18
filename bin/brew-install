@@ -62,6 +62,16 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 
+# ## Install Docker-Sync
+# echo 'Installing Docker-Sync...'
+# which -s docker-sync
+# if [[ $? != 0 ]]; then
+#   gem install -n /usr/local/bin docker-sync
+# else
+#   gem update docker-sync
+# fi
+# echo -e "\n\n"
+
 ## Check available disk space in gigabytes
 if free_disk_space 10; then
   echo "CHECK: You have at least 10gb available space."

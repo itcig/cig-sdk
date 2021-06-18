@@ -3,12 +3,11 @@
   connection: local
 
   vars:
-    # cig_sdk_dir: /usr/local/cig-sdk
+    cig_sdk_dir: /usr/local/cig-sdk
     cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
 
     # This is alias for localhost loopback so that containers can connect to software running in osx ports
-    # cig_sdk_docker_host_ip: 10.254.254.254
-    cig_sdk_docker_host_ip: host.docker.internal
+    cig_sdk_docker_host_ip: 10.254.254.254
 
   tasks:
     # Check if Docker is installed
@@ -46,49 +45,43 @@
       become: yes
       when: not pip_installed.stat.exists
     # Directory permissions
-    # - name: Check cig-sdk directory permissions
-    #   file:
-    #     path: "{{cig_sdk_dir}}"
-    #     state: directory
-    #     owner: "{{ansible_env.USER}}"
-    #     group: "staff"
-    #     recurse: yes
-    #     mode: 0755
-    #   # If this was somehow root owned make sure it's not anymore
-    #   become: yes
-    - name: Create cig-sdk directories
+    - name: Check cig-sdk directory permissions
       file:
-        path: "{{ item }}"
+        path: "{{cig_sdk_dir}}"
         state: directory
         owner: "{{ansible_env.USER}}"
         group: "staff"
         recurse: yes
         mode: 0755
-      loop:
-        - "{{ansible_env.HOME}}/.cig-sdk"
-        - "{{ansible_env.HOME}}/.cig-sdk/ca"
-        - "{{ansible_env.HOME}}/.cig-sdk/certs"
       # If this was somehow root owned make sure it's not anymore
       become: yes
-
-    # - name: Symlink cig-sdk bin to PATH
-    #   file:
-    #     src: "{{cig_sdk_dir}}/bin/cig-sdk"
-    #     dest: /usr/local/bin/cig-sdk
-    #     state: link
-    #   tags: ["pre-install"]
-    - name: Check that host ip looback is running
-      command: "ifconfig lo0 alias host.docker.internal"
+    - name: Create cig-sdk directories
+      file:
+        path: "{{ansible_env.HOME}}/.cig-sdk"
+        state: directory
+        owner: "{{ansible_env.USER}}"
+        group: "staff"
+        recurse: yes
+        mode: 0755
+      # If this was somehow root owned make sure it's not anymore
       become: yes
-    # No longer needed with built-in Docker host.docker.internal loopback
-    # - name: Ensure host ip looback after reboots
-    #   template:
-    #     src: templates/com.cig_sdk.docker_ip_alias.plist.j2
-    #     dest: /Library/LaunchDaemons/com.cig_sdk.docker_loopback_alias.plist
-    #     owner: root
-    #     group: wheel
-    #     mode: 0644
-    #   become: yes
+    - name: Symlink cig-sdk bin to PATH
+      file:
+        src: "{{cig_sdk_dir}}/bin/cig-sdk"
+        dest: /usr/local/bin/cig
+        state: link
+      tags: ["pre-install"]
+    - name: Check that host ip looback is running
+      command: "ifconfig lo0 alias {{ cig_sdk_docker_host_ip }}"
+      become: yes
+    - name: Ensure host ip looback after reboots
+      template:
+        src: templates/com.cig_sdk.docker_ip_alias.plist.j2
+        dest: /Library/LaunchDaemons/com.cig_sdk.docker_loopback_alias.plist
+        owner: root
+        group: wheel
+        mode: 0644
+      become: yes
     - name: Add localunixsocket.local hostname in /etc/hosts
       blockinfile:
         dest: /etc/hosts
@@ -115,8 +108,7 @@
         msg: "Check that Docker for Mac is enabled! /var/run/docker.sock is not mounted. :("
       when: not docker_socket.stat.exists
     - name: Start or reload cig-sdk services
-      command: "cig service up --build --force-recreate"
-      # command: "{{ cig_sdk_dir }}/bin/cig-sdk service up --build --force-recreate"
+      command: "{{ cig_sdk_dir }}/bin/cig-sdk service up --build --force-recreate"
     - name: Wait for signaler to create CA file
       wait_for:
         path: "{{ cig_sdk_user_files }}/ca/ca.crt"
@@ -145,7 +137,7 @@
       become: yes
       become_method: sudo
       with_items:
-        - { ip: "{{ cig_sdk_docker_host_ip }}", domain: local }
+        - { ip: "{{ cig_sdk_docker_host_ip }}", domain: test }
       tags: ["dns"]
     - name: Create dns resolver files at /etc/resolver/
       template:
@@ -155,5 +147,5 @@
       become: yes
       become_method: sudo
       with_items:
-        - { ip: "{{ cig_sdk_docker_host_ip }}", domain: local }
+        - { ip: "{{ cig_sdk_docker_host_ip }}", domain: test }
       tags: ["dns"]
