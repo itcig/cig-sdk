@@ -90,7 +90,7 @@ echo -e "\n"
 
 # Continue with cig-sdk setup
 cd "$CIG_SDK_DIR/ansible/" || exit
-ansible-playbook mac.yml -i 127.0.0.1, -vvv --extra-vars "cig_sdk_dir=$CIG_SDK_DIR"
+ansible-playbook mac.yml -i 127.0.0.1, --ask-become-pass -vvv --extra-vars "cig_sdk_dir=$CIG_SDK_DIR"
 
 
 # Help user to debug usual problems
