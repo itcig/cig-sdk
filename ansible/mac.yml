@@ -1,6 +1,7 @@
 # Must pass in cig_sdk_dir as a runtime variable
 ---
 - hosts: 127.0.0.1
+  connection: local
 
   vars:
     cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
