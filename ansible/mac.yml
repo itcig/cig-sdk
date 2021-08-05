@@ -70,7 +70,7 @@
       become: yes
     - name: Symlink cig-sdk bin to PATH
       file:
-        src: "{{cig_sdk_dir}}/bin/cig-sdk"
+        src: "{{cig_sdk_dir}}/bin/cig"
         dest: /usr/local/bin/cig
         state: link
       tags: ["pre-install"]

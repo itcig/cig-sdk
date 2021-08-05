@@ -102,14 +102,14 @@ fi
 echo -e "\n\n"
 
 ## Install Docker-Sync
-echo 'Installing Docker-Sync...'
-which -s docker-sync
-if [[ $? != 0 ]]; then
-  gem install -n /usr/local/bin docker-sync
-else
-  gem update docker-sync
-fi
-echo -e "\n\n"
+# echo 'Installing Docker-Sync...'
+# which -s docker-sync
+# if [[ $? != 0 ]]; then
+#   gem install -n /usr/local/bin docker-sync
+# else
+#   gem update docker-sync
+# fi
+# echo -e "\n\n"
 
 ## Check available disk space in gigabytes
 if free_disk_space 10; then
@@ -136,6 +136,9 @@ fi
 
 echo 'Handing Playbook to Ansible (will require your sudo password)...'
 echo -e "\n"
+
+# Rename cig-sdk app to cig
+mv "$CIG_SDK_DIR/bin/cig-sdk" "$CIG_SDK_DIR/bin/cig"
 
 # Continue with cig-sdk setup
 cd /usr/local/cig-sdk/ansible/ || exit
