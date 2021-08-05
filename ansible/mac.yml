@@ -10,6 +10,9 @@
     cig_sdk_docker_host_ip: 10.254.254.254
 
   tasks:
+    - name: Get cig_sdk_dir path
+      debug:
+        msg: "CIG_SDK_DIR set to '{{cig_sdk_dir}}'"
     # Check if Docker is installed
     - name: Check if Docker is installed
       stat:
@@ -108,7 +111,7 @@
         msg: "Check that Docker for Mac is enabled! /var/run/docker.sock is not mounted. :("
       when: not docker_socket.stat.exists
     - name: Start or reload cig-sdk services
-      command: "{{ cig_sdk_dir }}/bin/cig-sdk service up --build --force-recreate"
+      command: "{{ cig_sdk_dir }}/bin/cig service up --build --force-recreate"
     - name: Wait for signaler to create CA file
       wait_for:
         path: "{{ cig_sdk_user_files }}/ca/ca.crt"
