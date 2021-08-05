@@ -4,7 +4,28 @@
 
 CIG-SDK is a helper script for all your container related development needs. It's for locally developing containerized applications.
 
-## Quick installation
+
+## Install with Brew
+
+Add custom Tap
+
+```
+$ brew tap itcig/tools
+```
+
+Install formula
+
+```
+$ brew install itcig/tools/cig-sdk
+```
+
+When prompted, enter your admin password to allow Ansible to install all pip components
+
+```
+$ BECOME password:
+``` 
+
+## Manual installation
 
 Install cig-sdk dependencies and start the development environment by running:
 
