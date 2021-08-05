@@ -3,7 +3,6 @@
   connection: local
 
   vars:
-    cig_sdk_dir: "/usr/local/cig-sdk"
     cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
     machine_ip: 172.17.0.1
     compose_version: 1.15.0
