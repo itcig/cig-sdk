@@ -6,7 +6,7 @@ ANSIBLE_NEEDED="2.0"
 # Only OS X yosemite and later support xhyve
 OSX_NEEDED="10.10.0"
 
-# Root SDK directory installed by homebrew
+# Root SDK directory installed (will be replaced by Homebrew install)
 CIG_SDK_DIR='/usr/local/cig-sdk'
 
 # Returns 1 if upgrade is needed
@@ -62,16 +62,6 @@ if [[ $? != 0 ]]; then
   exit 1
 fi
 
-# ## Install Docker-Sync
-# echo 'Installing Docker-Sync...'
-# which -s docker-sync
-# if [[ $? != 0 ]]; then
-#   gem install -n /usr/local/bin docker-sync
-# else
-#   gem update docker-sync
-# fi
-# echo -e "\n\n"
-
 ## Check available disk space in gigabytes
 if free_disk_space 10; then
   echo "CHECK: You have at least 10gb available space."
@@ -90,8 +80,7 @@ echo -e "\n"
 
 # Continue with cig-sdk setup
 cd "$CIG_SDK_DIR/ansible/" || exit
-ansible-playbook mac.yml -i 127.0.0.1, --ask-become-pass -vvv --extra-vars "cig_sdk_dir=$CIG_SDK_DIR"
-
+ansible-playbook brew.yml -i 127.0.0.1, --ask-become-pass -vvv --extra-vars "cig_sdk_dir=$CIG_SDK_DIR"
 
 # Help user to debug usual problems
 echo "If you had any errors you can try reboot your machine and then running this again."
