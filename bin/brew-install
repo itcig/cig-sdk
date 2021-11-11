@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # We need at least ansible 2.0 for blockinfile directive
 ANSIBLE_NEEDED="2.0"
