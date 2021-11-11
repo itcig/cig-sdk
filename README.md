@@ -58,12 +58,12 @@ It setups 4 service containers into your docker.
 This project uses excellent nginx proxy container from [jwilder/nginx-proxy](https://github.com/jwilder/nginx-proxy). This proxy reserver ports http/https ports from your localhost and proxies the requests to your project containers. Just provide `VIRTUAL_HOST=your-address.local` env in your projects `docker-compose.yml` and nginx proxy will take care of the rest.
 
 #### Custom DNS server
-We want to use real addresses for all containers. Some applications have strange behaviour if they are just used from `localhost:8080`. We use [andyshinn/dnsmasq](https://github.com/andyshinn/dnsmasq) for local dnsmasq which always responds `127.0.0.1` to any request. Installation script adds custom resolver file for your machine:
+We want to use real addresses for all containers. Some applications have strange behaviour if they are just used from `localhost:8080`. We use [andyshinn/dnsmasq](https://github.com/andyshinn/dnsmasq) for local dnsmasq which always responds `10.254.254.254` to any request. Installation script adds custom resolver file for your machine:
 
 ```
 $ cat /etc/resolver/test
 domain test
-nameserver 127.0.0.1
+nameserver 10.254.254.254
 search_order 1
 ```
 
