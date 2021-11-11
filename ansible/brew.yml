@@ -3,7 +3,7 @@
   connection: local
 
   vars:
-    cig_sdk_user_files: "~/.cig-sdk"
+    cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
 
     # This is alias for localhost loopback so that containers can connect to software running in osx ports
     cig_sdk_docker_host_ip: 10.254.254.254
@@ -34,6 +34,9 @@
         name: python
         state: present
       when: not python_installed.stat.exists
+    # Alias default python to python3
+    - name: Start or reload cig-sdk services
+      command: "ln -snf /usr/local/bin/python3 /usr/local/bin/python"
     # Check if PIP is installed
     - name: Check that pip is installed
       stat:
@@ -41,9 +44,7 @@
       register: pip_installed
     # Install PIP if not found
     - name: Install pip
-      easy_install:
-        name: pip
-        state: latest
+      command: "python -m pip install --upgrade pip"
       become: yes
       when: not pip_installed.stat.exists
     # Note: Not needed on brew version
@@ -113,7 +114,6 @@
       when: not docker_socket.stat.exists
     - name: Start or reload cig-sdk services
       command: "cig service up --build --force-recreate"
-      # command: "{{ cig_sdk_dir }}/bin/cig-sdk service up --build --force-recreate"
     - name: Wait for signaler to create CA file
       wait_for:
         path: "{{ cig_sdk_user_files }}/ca/ca.crt"
@@ -135,6 +135,7 @@
       become: yes
       become_method: sudo
       tags: ["dns"]
+
     - name: Delete resolver files to trigger dns change
       file:
         path: "/etc/resolver/{{item.domain}}"
@@ -144,6 +145,7 @@
       with_items:
         - { ip: "{{ cig_sdk_docker_host_ip }}", domain: test }
       tags: ["dns"]
+
     - name: Create dns resolver files at /etc/resolver/
       template:
         src: "templates/resolver-dev.conf.j2"
@@ -154,3 +156,17 @@
       with_items:
         - { ip: "{{ cig_sdk_docker_host_ip }}", domain: test }
       tags: ["dns"]
+
+    # Check if Google Cloud SDK is installed
+    - name: Check if Google Cloud SDK is installed
+      stat:
+        path: /usr/local/bin/gcloud
+      register: gcloud_installed
+      tags: ["gcloud"]
+    # Install Google Cloud SDK if not found
+    - name: Install Google Cloud SDK for Mac
+      homebrew_cask:
+        name: google-cloud-sdk
+        state: present
+      when: not gcloud_installed.stat.exists
+      tags: ["gcloud"]

@@ -4,7 +4,7 @@
   connection: local
 
   vars:
-    cig_sdk_user_files: "~/.cig-sdk"
+    cig_sdk_user_files: "{{ansible_env.HOME}}/.cig-sdk"
 
     # This is alias for localhost loopback so that containers can connect to software running in osx ports
     cig_sdk_docker_host_ip: 10.254.254.254
