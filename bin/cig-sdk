@@ -50,7 +50,7 @@ HEREDOC
     if(!File.exist?("#{CIG_SDK_USER_FILES}/config"))
       puts "Config not found, running setup..."
 
-      send(:self, ['update'])
+      send(:self, ['init'])
     end
 
     if PROXY_UNMODIFIED_TO_COMPOSE.include?(args[0])
@@ -236,7 +236,22 @@ HEREDOC
   end
 
   def self(args)    
-    if (args[0] == "update")
+    if (args[0] == "init")
+      if RUBY_PLATFORM.include? "linux"
+        system("cd #{CIG_SDK_DIR} && setup/ubuntu --cig-sdk #{CIG_SDK_DIR}")
+      else
+        system("cd #{CIG_SDK_DIR} && setup/bootstrap --cig-sdk #{CIG_SDK_DIR}")
+      end
+
+      puts "\n\n"
+      puts "**********************************************"
+      puts "***                                        ***"
+      puts "***  \e[32mCIG SDK installed and ready to rock!\e[0m  ***"
+      puts "***                                        ***"
+      puts "**********************************************"
+      puts "\n\n"
+
+    elsif (args[0] == "update")
       if (args[1] == "dns")
         if RUBY_PLATFORM.include? "linux"
           system("ansible-playbook #{CIG_SDK_DIR}/ansible/ubuntu.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns")
