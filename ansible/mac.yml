@@ -113,13 +113,18 @@
       fail:
         msg: "Check that Docker for Mac is enabled! /var/run/docker.sock is not mounted. :("
       when: not docker_socket.stat.exists
-    - name: Start or reload cig-sdk services
-      command: "BOX_IP={{cig_sdk_docker_host_ip}} docker-compose -f {{cig_sdk_dir}}/docker/services.yml -p cig up -d --build --force-recreate"
+
+    - name: Start cig-sdk services
+      command: "docker-compose -f {{cig_sdk_dir}}/docker/services.yml -p cig up -d --build --force-recreate"
+      environment:
+        BOX_IP: "{{cig_sdk_docker_host_ip}}"
+
     - name: Wait for signaler to create CA file
       wait_for:
         path: "{{ cig_sdk_user_files }}/ca/ca.crt"
         state: present
-        timeout: 30
+        timeout: 60
+
     # This only works in OS X and doesn't affect firefox
     # We want to use https locally and you only use ca.key which is generated to you
     - name: Trust self-generated signaler Root certificate in keychain
@@ -128,6 +133,7 @@
         chdir: "{{ cig_sdk_user_files }}/ca/"
       become: yes
       become_method: sudo
+
     - name: Create resolver directory
       file:
         path: /etc/resolver
