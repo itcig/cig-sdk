@@ -217,22 +217,21 @@ main() {
   fi
 
   # Check out a copy of this repo (first time only) ##
-  # TODO: Enable this after
-  # if [ -d "$CIG_SDK_DIR" ]; then
-  #   if [ -d "$CIG_SDK_DIR/.git" ]; then
-  #     echo "Updating pre-existing cig-sdk repo..."
-  #     cd "$CIG_SDK_DIR" || exit
-  #     # Remove any local changes and update to origin
-  #     git reset HEAD --hard && git pull origin HEAD
-  #   else
-  #     # On OSX Sierra /usr/local is not owned by admin user and we can't just clone over there
-  #     echo "Checking out cig-sdk repo... ( This needs sudo permissions )"
-  #     sudo git clone https://github.com/$REPO.git "$CIG_SDK_DIR"
+  if [ -d "$CIG_SDK_DIR" ]; then
+    if [ -d "$CIG_SDK_DIR/.git" ]; then
+      echo "Updating pre-existing cig-sdk repo..."
+      cd "$CIG_SDK_DIR" || exit
+      # Remove any local changes and update to origin
+      git reset HEAD --hard && git pull origin HEAD
+    else
+      # On OSX Sierra /usr/local is not owned by admin user and we can't just clone over there
+      echo "Checking out cig-sdk repo... ( This needs sudo permissions )"
+      sudo git clone https://github.com/$REPO.git "$CIG_SDK_DIR"
 
-  #     # Check that cig-sdk folder has right permissions
-  #     sudo chown -R "$USER":"$(id -gn)" "$CIG_SDK_DIR"
-  #   fi
-  # fi
+      # Check that cig-sdk folder has right permissions
+      sudo chown -R "$USER":"$(id -gn)" "$CIG_SDK_DIR"
+    fi
+  fi
 
   # Link cig-sdk app to cig if not installed already via Brew
   if [ -e "/usr/local/bin/cig" ]; then
