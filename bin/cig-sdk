@@ -43,8 +43,16 @@ HEREDOC
   CREATE_HELP='Usage: $ cig create --type=wordpress --components=dustpress --stage=stage.mydomain.com --production=cloud.mydomain.com --theme=ssh://git@domain:/theme.git --sitename=myapp --stage=stage.mydomain.com --production=production.mydomain.com --git=ssh://git@mydomain:/my-app.git'
   
   CIG_SDK_DIR=File.expand_path('..', __dir__)
+  CIG_SDK_USER_FILES=File.join(Dir.home,'.cig-sdk')
 
   def initialize(args)
+    # Check if config files exists and is on correct version
+    if(!File.exist?("#{CIG_SDK_USER_FILES}/config"))
+      puts "Config not found, running setup..."
+
+      send(:self, ['update'])
+    end
+
     if PROXY_UNMODIFIED_TO_COMPOSE.include?(args[0])
       system(args.unshift("docker-compose").join(" "))
     elsif PROXY_MODIFIED.include?(args[0])
