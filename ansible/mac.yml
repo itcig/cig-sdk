@@ -170,3 +170,12 @@
         state: present
       when: not gcloud_installed.stat.exists
       tags: ["gcloud"]
+
+    # Add default config file if not present
+    - name: Create config file at {{cig_sdk_user_files}}/config
+      template:
+        src: "templates/config.j2"
+        dest: "{{cig_sdk_user_files}}/config"
+        # Do not overwrite existing config
+        force: no
+      tags: ["config"]
