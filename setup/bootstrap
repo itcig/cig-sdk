@@ -10,7 +10,7 @@ OSX_NEEDED="10.10.0"
 REPO='itcig/cig-sdk'
 
 # Root SDK directory installed (will be replaced by Homebrew install)
-CIG_SDK_DIR=${CIG_SDK_DIR:-"$(pwd)"}
+CIG_SDK_DIR=${CIG_SDK_DIR:-"$(which cig | xargs realpath | sed 's/\/bin\/cig//g')"}
 
 usage() {
   cat - <<-EOF

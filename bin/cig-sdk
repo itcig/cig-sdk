@@ -179,9 +179,9 @@ HEREDOC
   #   elsif (args[0].nil?)
 
   #     if RUBY_PLATFORM.include? "linux"
-  #       system("cd #{CIG_SDK_DIR} && git reset HEAD --hard && git pull origin HEAD && bin/ubuntu")
+  #       system("cd #{CIG_SDK_DIR} && git reset HEAD --hard && git pull origin HEAD && setup/ubuntu")
   #     else
-  #       system("cd #{CIG_SDK_DIR} && git reset HEAD --hard && git pull origin HEAD && bin/bootstrap")
+  #       system("cd #{CIG_SDK_DIR} && git reset HEAD --hard && git pull origin HEAD && setup/bootstrap")
   #     end
   #     # Rebuild and reload all services
   #     puts "Refreshing all cig-sdk services..."
@@ -229,15 +229,27 @@ HEREDOC
 
   def self(args)    
     if (args[0] == "update")
-      if RUBY_PLATFORM.include? "linux"
-        system("cd #{CIG_SDK_DIR} && bin/ubuntu")
+      if (args[1] == "dns")
+        if RUBY_PLATFORM.include? "linux"
+          system("ansible-playbook #{CIG_SDK_DIR}/ansible/ubuntu.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns")
+        else
+          system("ansible-playbook #{CIG_SDK_DIR}/ansible/mac.yml -i 127.0.0.1, --ask-become-pass --verbose --tags=dns")
+        end
+
+      elsif (args[1].nil?)        
+        if RUBY_PLATFORM.include? "linux"
+          system("cd #{CIG_SDK_DIR} && setup/ubuntu --cig-sdk #{CIG_SDK_DIR}")
+        else
+          system("cd #{CIG_SDK_DIR} && setup/bootstrap --cig-sdk #{CIG_SDK_DIR}")
+        end
+        # Rebuild and reload all services
+        puts "Refreshing all cig-sdk services..."
+        service(['build nginx'])
+        service(['reload'])
+        
       else
-        system("cd #{CIG_SDK_DIR} && bin/bootstrap")
+        puts "Did you mean to run: $ cig self update ?"
       end
-      # Rebuild and reload all services
-      puts "Refreshing all cig-sdk services..."
-      service(['build nginx'])
-      service(['reload'])
     else
       puts "Did you mean to run: $ cig self ?"
     end
