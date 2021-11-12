@@ -4,7 +4,7 @@ require 'yaml'
 require 'json'
 
 class DevTool
-  VERSION = '0.4.0'
+  VERSION = '0.4.1'
   MAIN_HELP_BANNER = <<HEREDOC
 Execute various commands within the developer environment
 
