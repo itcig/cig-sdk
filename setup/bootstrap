@@ -217,7 +217,7 @@ main() {
   fi
 
   # Check out a copy of this repo (first time only) ##
-  if [ -d "$CIG_SDK_DIR" ]; then
+  if [ ! -d "$CIG_SDK_DIR" ]; then
     if [ -d "$CIG_SDK_DIR/.git" ]; then
       echo "Updating pre-existing cig-sdk repo..."
       cd "$CIG_SDK_DIR" || exit
