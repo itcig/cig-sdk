@@ -95,6 +95,7 @@
           127.0.0.1 localunixsocket
           127.0.0.1 localunixsocket.lan
           127.0.0.1 localunixsocket.local
+          127.0.0.1	host.docker.internal
       tags: ["hosts"]
       become: yes
     - name: Start docker for mac
@@ -163,6 +164,7 @@
         path: /usr/local/bin/gcloud
       register: gcloud_installed
       tags: ["gcloud"]
+
     # Install Google Cloud SDK if not found
     - name: Install Google Cloud SDK for Mac
       homebrew_cask:
