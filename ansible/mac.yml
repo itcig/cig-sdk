@@ -59,6 +59,7 @@
     #     mode: 0755
     #   # If this was somehow root owned make sure it's not anymore
     #   become: yes
+    #
     - name: Create cig-sdk directories
       file:
         path: "{{ansible_env.HOME}}/.cig-sdk"
@@ -113,6 +114,12 @@
       fail:
         msg: "Check that Docker for Mac is enabled! /var/run/docker.sock is not mounted. :("
       when: not docker_socket.stat.exists
+
+    - name: "Uninstall DNSMasq if running locally"
+      homebrew:
+        name: dnsmasq
+        state: uninstalled
+      tags: ["dns"]
 
     - name: Start cig-sdk services
       command: "docker-compose -f {{cig_sdk_dir}}/docker/services.yml -p cig up -d --build --force-recreate"
