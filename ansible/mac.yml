@@ -121,6 +121,11 @@
         state: uninstalled
       tags: ["dns"]
 
+    - name: Stop previously running cig-sdk services
+      command: "docker-compose -f {{cig_sdk_dir}}/docker/services.yml -p cig down"
+      environment:
+        BOX_IP: "{{cig_sdk_docker_host_ip}}"
+
     # Required ports are: 80, 443, 53, 25
     - name: Check if required ports are available
       shell: 'lsof -PiTCP -sTCP:LISTEN | grep -E '':(25|53|80|443)'' | awk ''{split($9,p,":"); print $1" (port "p[2]")";}'' | sort | uniq'
@@ -145,7 +150,7 @@
 
     # This only works in OS X and doesn't affect firefox
     # We want to use https locally and you only use ca.key which is generated to you
-    - name: Trust self-generated signaler Root certificate in keychain
+    - name: Trust self-generated signaler Root certificate in keychain (Mac will open password prompt)
       shell: "security add-trusted-cert -d -r trustRoot -k '/Library/Keychains/System.keychain' ca.crt"
       args:
         chdir: "{{ cig_sdk_user_files }}/ca/"
