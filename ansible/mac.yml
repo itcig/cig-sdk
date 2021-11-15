@@ -121,6 +121,17 @@
         state: uninstalled
       tags: ["dns"]
 
+    # Required ports are: 80, 443, 53, 25
+    - name: Check if required ports are available
+      shell: 'lsof -PiTCP -sTCP:LISTEN | grep -E '':(25|53|80|443)'' | awk ''{split($9,p,":"); print $1" (port "p[2]")";}'' | sort | uniq'
+      register: check_ports
+
+    - fail:
+        msg: |
+          Required port is in use:
+          {{ check_ports.stdout }}
+      when: check_ports.stdout != ""
+
     - name: Start cig-sdk services
       command: "docker-compose -f {{cig_sdk_dir}}/docker/services.yml -p cig up -d --build --force-recreate"
       environment:
