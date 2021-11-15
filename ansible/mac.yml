@@ -128,7 +128,7 @@
 
     # Required ports are: 80, 443, 53, 25
     - name: Check if required ports are available
-      shell: 'lsof -PiTCP -sTCP:LISTEN | grep -E '':(25|53|80|443)'' | awk ''{split($9,p,":"); print $1" (port "p[2]")";}'' | sort | uniq'
+      shell: 'lsof -PiTCP -sTCP:LISTEN | grep -E '':(25|53|80|443)\s'' | awk ''{split($9,p,":"); print $1" (port "p[2]")";}'' | sort | uniq'
       register: check_ports
 
     - fail:
