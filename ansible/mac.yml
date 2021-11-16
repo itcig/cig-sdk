@@ -115,6 +115,11 @@
         msg: "Check that Docker for Mac is enabled! /var/run/docker.sock is not mounted. :("
       when: not docker_socket.stat.exists
 
+    - name: Shutdown local Apache server
+      command: "which apachectl && apachectl stop"
+      become: yes
+      become_method: sudo
+
     - name: "Uninstall DNSMasq if running locally"
       homebrew:
         name: dnsmasq

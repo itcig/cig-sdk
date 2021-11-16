@@ -30,9 +30,9 @@ Commands:
 
 HEREDOC
 
-  PROXY_UNMODIFIED_TO_COMPOSE=%w{down pause restart unpause}
+  PROXY_UNMODIFIED_TO_COMPOSE=%w{down pause unpause}
   PROXY_MODIFIED=%w{logs up run help}
-  OTHER_COMMANDS=%w{wait reload cleanup service status shell exec version self}
+  OTHER_COMMANDS=%w{wait reload restart cleanup service status shell exec version self}
 
   CIG_SDK_DIR=File.expand_path('..', __dir__)
   CIG_SDK_USER_FILES=File.join(Dir.home,'.cig-sdk')
@@ -137,6 +137,19 @@ HEREDOC
     system(args.join(" "))
   end
 
+  # Restart containers without rebuilding images
+  def restart(args)
+    # Start services if not running
+    service(["up"])
+
+    args.unshift("-d")
+    args.unshift("--force-recreate")
+    args.unshift("up")
+    args.unshift("docker-compose")
+    
+    system(args.join(" "))
+  end
+
   # open shell into container, default to web and bash
   def shell(args)
     if(!args[0])
@@ -180,12 +193,16 @@ HEREDOC
     if (args[0] == "logs")
       args.push("-f")
       args[0] = "logs"
-    elsif (args[0] == "restart")
+    elsif (args[0] == "restart")      
       args[0] = "up"
       args.push("--build")
       args.push("--force-recreate")
     elsif (args[0] == "up")
+      should_stop_apache = true
+
       args.push("-d")
+    elsif (args[0] == "down")
+      should_start_apache = true
     elsif (args[0].nil? || args[0] == "--help")
       no_command_given = true
     end
@@ -203,8 +220,18 @@ HEREDOC
         box_ip="10.254.254.254"
       end
 
+      # Stop Apache before starting Docker services 
+      if (should_stop_apache)
+        system("sudo apachectl stop")
+      end
+
       # Set system variables which we can use in our templates
       system({"BOX_IP" => box_ip},args.join(" "))
+
+      # Start Apache after tearing down Docker services 
+      if (should_start_apache)
+        system("sudo apachectl start")
+      end
     end
   end
 
