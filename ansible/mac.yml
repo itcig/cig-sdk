@@ -215,3 +215,8 @@
         # Do not overwrite existing config
         force: no
       tags: ["config"]
+
+    - name: Install Kustomize
+      homebrew:
+        name: kustomize
+        state: present
