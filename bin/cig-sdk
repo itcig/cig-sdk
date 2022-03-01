@@ -192,9 +192,10 @@ HEREDOC
 
     if (args[0] == "logs")
       args.push("-f")
-      args[0] = "logs"
     elsif (args[0] == "restart")      
       args[0] = "up"
+
+      args.push("-d")
       args.push("--build")
       args.push("--force-recreate")
     elsif (args[0] == "up")
