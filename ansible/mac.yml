@@ -27,16 +27,13 @@
     - name: Check that Python is installed
       stat:
         path: /usr/local/bin/python3
-      register: python_installed
+      register: python_installed      
     # Install Python if not found
     - name: Install python
       homebrew:
         name: python
         state: present
       when: not python_installed.stat.exists
-    # Alias default python to python3
-    - name: Start or reload cig-sdk services
-      command: "ln -snf /usr/local/bin/python3 /usr/local/bin/python"
     # Check if PIP is installed
     - name: Check that pip is installed
       stat:
@@ -44,7 +41,7 @@
       register: pip_installed
     # Install PIP if not found
     - name: Install pip
-      command: "python -m pip install --upgrade pip"
+      command: "python3 -m pip install --upgrade pip"
       become: yes
       when: not pip_installed.stat.exists
     # Note: Not needed on brew version
