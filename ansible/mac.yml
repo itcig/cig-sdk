@@ -123,9 +123,10 @@
       when: not docker_socket.stat.exists
 
     - name: Shutdown local Apache server
-      command: "which apachectl && apachectl stop"
+      command: "command -v apachectl && apachectl stop"
       become: yes
       become_method: sudo
+      ignore_errors: yes
 
     - name: "Uninstall DNSMasq if running locally"
       homebrew:
