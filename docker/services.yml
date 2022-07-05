@@ -22,11 +22,11 @@ services:
   dnsmasq:
     image: andyshinn/dnsmasq
     ports:
-      - ${BOX_IP}:53:53/tcp
-      - ${BOX_IP}:53:53/udp
+      - ${BOX_IP:-127.0.0.1}:53:53/tcp
+      - ${BOX_IP:-127.0.0.1}:53:53/udp
     cap_add:
       - NET_ADMIN
-    command: "--address=/test/${BOX_IP}"
+    command: "--address=/test/${BOX_IP:-127.0.01}"
     restart: always
     network_mode: "bridge"
   mail:
