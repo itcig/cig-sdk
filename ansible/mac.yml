@@ -12,38 +12,48 @@
     - name: Get cig_sdk_dir path
       debug:
         msg: "CIG_SDK_DIR set to '{{cig_sdk_dir}}'"
+
     # Check if Docker is installed
     - name: Check if Docker is installed
-      stat:
-        path: /usr/local/bin/docker
+      shell: command -v docker >/dev/null 2>&1
       register: docker_installed
+      ignore_errors: yes
+
     # Install Docker if not found
     - name: Install Docker for Mac
       homebrew_cask:
         name: docker
         state: present
-      when: not docker_installed.stat.exists
+      when: docker_installed.rc != 0
+
     # Check if Python is installed
-    - name: Check that Python is installed
-      stat:
-        path: /usr/local/bin/python3
-      register: python_installed      
+    - name: Check that Python 3 is installed
+      shell: command -v python3 >/dev/null 2>&1
+      register: python_installed
+      ignore_errors: yes
+
+      # stat:
+      #   path: /usr/local/bin/python3
+      # register: python_installed      
     # Install Python if not found
     - name: Install python
       homebrew:
         name: python
         state: present
-      when: not python_installed.stat.exists
+      when: python_installed.rc != 0
+
     # Check if PIP is installed
     - name: Check that pip is installed
-      stat:
-        path: /usr/local/bin/pip
+      shell: command -v pip >/dev/null 2>&1
       register: pip_installed
+      ignore_errors: yes
+
     # Install PIP if not found
     - name: Install pip
       command: "python3 -m pip install --upgrade pip"
       become: yes
-      when: not pip_installed.stat.exists
+      when: pip_installed.rc != 0
+  
     # Note: Not needed on brew version
     # Directory permissions
     # - name: Check cig-sdk directory permissions
@@ -191,9 +201,9 @@
 
     # Check if Google Cloud SDK is installed
     - name: Check if Google Cloud SDK is installed
-      stat:
-        path: /usr/local/bin/gcloud
+      shell: command -v gcloud >/dev/null 2>&1
       register: gcloud_installed
+      ignore_errors: yes
       tags: ["gcloud"]
 
     # Install Google Cloud SDK if not found
@@ -201,7 +211,7 @@
       homebrew_cask:
         name: google-cloud-sdk
         state: present
-      when: not gcloud_installed.stat.exists
+      when: gcloud_installed.rc != 0
       tags: ["gcloud"]
 
     # Add default config file if not present
