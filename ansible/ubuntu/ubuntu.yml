@@ -15,6 +15,12 @@
         name: ruby
         state: latest
 
+    - name: "Remove pip Docker installs if present" 
+      become: yes
+      become_method: sudo
+      command: "pip uninstall -y docker-py docker;"
+      ignore_errors: yes
+
     - name: "Add Docker key"
       become: yes
       become_method: sudo
@@ -29,14 +35,33 @@
         repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable"
         state: present
 
-    - name: Install Docker
+    - name: "Remove old versions of Docker"
       become: yes
       become_method: sudo
       apt:
-        name: docker-ce
-        state: latest
-        update_cache: yes
+        pkg:
+          - docker
+          - docker-engine
+          - docker.io
+          - containerd
+          - runc
+        state: absent
+      ignore_errors: yes
 
+    # For Bionic release and up
+#    - name: Install Docker
+#      become: yes
+#      become_method: sudo
+#      apt:
+#        pkg:
+#          - docker-ce
+#          - docker-ce-cli
+#          - containerd.io
+#          - docker-compose-plugin
+#        state: latest
+#        update_cache: yes
+
+    # For Xenial and Zesty
     - name: Install Docker Compose
       become: yes
       become_method: sudo
@@ -72,6 +97,11 @@
       become: yes
       become_method: sudo
 
+    - name: Apply changes to logged-in user
+      shell: su {{ansible_env.USER}}
+      become: yes
+      become_method: sudo
+
     - name: Start Docker if it is not running
       become: yes
       become_method: sudo
@@ -80,7 +110,8 @@
         state: started
 
     - name: Start cig-sdk services
-      shell: "sg docker -c '{{ cig_sdk_dir }}/bin/cig-sdk service up'"
+#      shell: "sg docker -c '{{ cig_sdk_dir }}/bin/cig-sdk service up'"
+      command: "docker-compose -f {{cig_sdk_dir}}/docker/services.yml -p cig up -d --build --force-recreate"
 
     - name: Wait for signaler to create CA file
       wait_for:
